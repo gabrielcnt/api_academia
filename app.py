@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 # Instanciando o flask
 app = Flask(__name__)
@@ -22,11 +22,13 @@ exercicios = [
 
 # rotas
 
+# listar todas os exercicios
 @app.route('/exercicios', methods=['GET'])
 def get_exercicios():
     return jsonify({"exercicios": exercicios}), 200
 
 
+#buscar exercicio por id
 @app.route('/exercicios/<int:id>', methods=['GET'])
 def get_exercicios_by_id(id):
     
@@ -35,6 +37,20 @@ def get_exercicios_by_id(id):
             return jsonify({"exercicio": exercicio}), 200
     
     return jsonify({"erro": "exercicio não encontrado"}), 404
+
+
+
+#busca do exercio por nome
+@app.route('/exercicio', methods=['GET'])
+def get_for_nome():
+    nome = request.args['nome']
+    
+    for exercicio in exercicios:
+        if exercicio['nome'] == nome:
+            return jsonify({'exercicio': exercicio}), 200
+    
+    return jsonify({"erro": "exercicio não encontrado"}),404
+
 
 
 
