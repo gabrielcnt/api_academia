@@ -23,9 +23,20 @@ exercicios = [
 # rotas
 
 @app.route('/exercicios', methods=['GET'])
-
 def get_exercicios():
     return jsonify({"exercicios": exercicios}), 200
+
+
+@app.route('/exercicios/<int:id>', methods=['GET'])
+def get_exercicios_by_id(id):
+    
+    for exercicio in exercicios:
+        if exercicio["id"] == id:
+            return jsonify({"exercicio": exercicio}), 200
+    
+    return jsonify({"erro": "exercicio não encontrado"}), 404
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
