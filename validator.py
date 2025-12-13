@@ -1,22 +1,43 @@
-def validacoes(dado):
-    erros = []
-    if not dado:
-        erros.append("dado não enviado")
+
+class Validator:
+
+    @staticmethod
+    def validar_post(dado):
+        erros = []
+        
+        if not dado:
+            return "dado não enviado"
+        
+        campos = [
+            "id",
+            "nome",
+            "grupo_muscular",
+            "series",
+            "repeticoes"
+        ]
+        for campo in campos:
+            if campo not in dado:
+                erros.append(f"O campo {campo} é obrigatorio")
         return erros
+        
     
-    if "id" not in dado:
-        erros.append("O campo 'id' é obrigatório")
+    @staticmethod
+    def validar_put_del(dado):
+        erros = []
 
-    if "nome" not in dado:
-        erros.append("O campo 'nome' é obrigatório")
+        if not dado:
+            return "dado não enviado"
+        
+        campos = [
+            "nome",
+            "grupo_muscular",
+            "series",
+            "repeticoes"
+        ]
 
-    if "grupo_muscular" not in dado:
-        erros.append("O campo 'grupo_muscular' é obrigatório")
+        for campo in campos:
+            if campo not in dado:
+                erros.append(f"O campo {campo} é obrigatorio")
+        
+        return erros
 
-    if "series" not in dado:
-        erros.append("O campo 'series' é obrigatório")
-
-    if "repeticoes" not in dado:
-        erros.append("O campo 'repeticoes' é obrigatório")
-    
-    return erros
