@@ -100,5 +100,24 @@ def update_exercicio(id):
     return jsonify({"erro": "exercicio não encontrado"}), 404
 
 
+
+#deletar um exercicio
+@app.route('/exercicio/<int:id>', methods=['DELETE'])
+def delete_exercicio(id):
+
+    deletar_exercicio = None
+
+    for exercicio in exercicios:
+        if exercicio['id'] == id:
+            deletar_exercicio = exercicio
+
+    if deletar_exercicio is None:
+        return jsonify({"erro": "exercicio não encontrado"}), 404
+
+    exercicios.remove(deletar_exercicio)
+    
+    return jsonify({"mensagem": "exercicio removido com sucesso"}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
