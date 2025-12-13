@@ -16,7 +16,7 @@ exercicios = [
         "nome": "puxada frontal",
         "grupo_muscular": "costas",
         "series": 3,
-        "repetições": 12
+        "repeticoes": 12
     }
 ]
 
@@ -52,6 +52,41 @@ def get_for_nome():
     return jsonify({"erro": "exercicio não encontrado"}),404
 
 
+#criar um exercicio
+@app.route('/exercicio', methods=['POST'])
+def create_exercicio():
+    
+    dado = request.get_json()
+
+    if not dado:
+        return jsonify({"erro": "dado não enviado"}), 400
+    
+    if "id" not in dado:
+        return jsonify({"erro": "O campo 'id' é obrigatório"}), 400
+
+    if "nome" not in dado:
+        return jsonify({"erro": "O campo 'nome' é obrigatório"}), 400
+
+    if "grupo_muscular" not in dado:
+        return jsonify({"erro": "O campo 'grupo_muscular' é obrigatório"}), 400
+
+    if "series" not in dado:
+        return jsonify({"erro": "O campo 'series' é obrigatório"}), 400
+
+    if "repeticoes" not in dado:
+        return jsonify({"erro": "O campo 'repeticoes' é obrigatório"}), 400
+
+    novo_exercicio = {
+        "id": dado["id"],
+        "nome": dado["nome"],
+        "grupo_muscular": dado["grupo_muscular"],
+        "series": dado["series"],
+        "repeticoes": dado["repeticoes"]
+    }
+
+    exercicios.append(novo_exercicio)
+
+    return jsonify({"exercicio criado": novo_exercicio}), 201
 
 
 if __name__ == "__main__":
