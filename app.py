@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from validator import validacoes
+from validator import Validator
 
 # Instanciando o flask
 app = Flask(__name__)
@@ -10,7 +10,7 @@ exercicios = [
         "nome": "supino reto",
         "grupo_muscular": "peito",
         "series": 4,
-        "repetições": 12
+        "repeticoes": 12
     },
     {
         "id": 2,
@@ -59,7 +59,7 @@ def create_exercicio():
     
     dado = request.get_json()
 
-    erros = validacoes(dado)
+    erros = Validator.validar_post(dado)
     if erros:
         return jsonify({"erros": erros}), 400
 
@@ -75,6 +75,29 @@ def create_exercicio():
 
     return jsonify({"exercicio criado": novo_exercicio}), 201
 
+
+
+#atualizar exercicios
+@app.route('/exercicio/<int:id>', methods=['PUT'])
+def update_exercicio(id):
+
+    novo_dado = request.get_json()
+
+    erros = Validator.validar_put_del(novo_dado)
+
+    if erros:
+        return jsonify({"erros": erros}), 400
+    
+    for exercicio in exercicios:
+        if exercicio['id'] == id:
+            exercicio['nome'] = novo_dado['nome']
+            exercicio['grupo_muscular'] = novo_dado['grupo_muscular']
+            exercicio['series'] = novo_dado['series']
+            exercicio['repeticoes'] = novo_dado['repeticoes']
+
+            return jsonify({"exercicio atualizado": exercicio}), 200
+    
+    return jsonify({"erro": "exercicio não encontrado"}), 404
 
 
 if __name__ == "__main__":
