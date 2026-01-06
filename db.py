@@ -1,0 +1,2 @@
+alunos = {}
+exercicios = {}

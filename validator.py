@@ -9,7 +9,6 @@ class Validator:
             return "dado não enviado"
         
         campos = [
-            "id",
             "nome",
             "grupo_muscular",
             "series",
