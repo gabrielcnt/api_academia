@@ -1,57 +1,169 @@
-# API Academia (Exercicios)
+# API Academia
 
-API simples para gerenciar exercicios (lista em memória)
+API REST para gerenciar alunos e exercícios de academia.
 
 ## Sobre
 
-Endpoints pra listar, buscar, criar, atualizar e deletar exercicios.
+Endpoints para criar, listar, buscar, atualizar e deletar alunos e exercícios.
 
-## Como executar (Linux)
+## Instalação
 
-1. Criar e ativar virtualenv:
-```
+1. **Criar e ativar virtualenv:**
+```bash
 python3 -m venv venv
 source venv/bin/activate
-
-2. Instalar dependências:
 ```
+
+2. **Instalar dependências:**
+```bash
 pip install -r requirements.txt
 ```
 
-3. Rodar:
-```
-python3 app.py
+## Como Executar
+
+```bash
+python app.py
 ```
 
-A API estará em http://127.0.0.1:5000
+A API estará disponível em `http://127.0.0.1:5000`
+
+## Documentação Interativa
+
+Acesse a documentação Swagger UI em: `http://127.0.0.1:5000/docs`
+
+## Banco de Dados
+
+A API utiliza SQLite. O banco de dados é armazenado em `instance/data.db`
+
+Para resetar o banco, delete o arquivo `instance/data.db` e reinicie a aplicação.
 
 ## Endpoints
-- GET /exercicios — listar todos
-- GET /exercicios/<id> — buscar por id
-- GET /exercicio?nome=... — buscar por nome (query param `nome`)
-- POST /exercicio — criar (JSON)
-- PUT /exercicio/<id> — atualizar (JSON)
-- DELETE /exercicio/<id> — deletar
+
+### Alunos
+
+- **GET** `/alunos` — Listar todos os alunos
+- **POST** `/alunos` — Criar novo aluno
+- **GET** `/alunos/<id>` — Buscar aluno por ID
+- **PUT** `/alunos/<id>` — Atualizar aluno
+- **DELETE** `/alunos/<id>` — Deletar aluno
+
+### Exercícios
+
+- **GET** `/exercicio` — Listar todos os exercícios
+- **POST** `/exercicio` — Criar novo exercício
+- **GET** `/exercicio/<id>` — Buscar exercício por ID
+- **PUT** `/exercicio/<id>` — Atualizar exercício completamente
+- **PATCH** `/exercicio/<id>` — Atualizar exercício parcialmente
+- **DELETE** `/exercicio/<id>` — Deletar exercício
+
+## Exemplos de Requests
+
+### Criar Aluno
+```bash
+curl -X POST http://localhost:5000/alunos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Silva",
+    "idade": 25,
+    "cpf": 12345678901
+  }'
 ```
 
+**Resposta (201):**
+```json
+{
+  "id": 1,
+  "nome": "João Silva",
+  "idade": 25,
+  "cpf": 12345678901,
+  "exercicio": []
+}
+```
 
-## Blueprints e Schemas
+### Listar Alunos
+```bash
+curl -X GET http://localhost:5000/alunos
+```
 
-### Blueprints (`resource/`)
-- **Local:** `resource/` — contains os blueprints registrados em `app.py`.
-- **exercicios.py:** rotas `/exercicio` e `/exercicio/<id>`; métodos: GET (lista/detalhe), POST (criar), PUT (atualizar inteiro), PATCH (atualizar parcial), DELETE (remover).
-- **aluno.py:** blueprint para rotas relacionadas a alunos (registro semelhante em `app.py`).
+### Buscar Aluno por ID
+```bash
+curl -X GET http://localhost:5000/alunos/1
+```
 
-### Schemas (`schemas/`)
-- **Local:** `schemas/` — validação e serialização com `marshmallow`.
-- **exercicios.py:** campos: `id` (str), `nome` (str, obrigatório), `grupo_muscular` (str, obrigatório), `repeticoes` (int, >=1), `series` (int, >=1).
-- **aluno.py:** schemas para validação de dados de alunos (ver `schemas/aluno.py`).
+### Atualizar Aluno
+```bash
+curl -X PUT http://localhost:5000/alunos/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Santos",
+    "idade": 26,
+    "cpf": 12345678901
+  }'
+```
 
-### Observações rápidas
-- Blueprints são registrados em `app.py` com `api.register_blueprint(...)`.
-- O decorator `@<blueprint>.arguments` desserializa o JSON e injeta o objeto como parâmetro do método (ex.: `def post(self, dado):`).
-- Swagger (docs) disponível em `/docs` quando `flask-smorest` está configurado corretamente.
+### Deletar Aluno
+```bash
+curl -X DELETE http://localhost:5000/alunos/1
+```
 
----
+### Criar Exercício
+```bash
+curl -X POST http://localhost:5000/exercicio \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Supino",
+    "grupo_muscular": "Peito",
+    "series": 4,
+    "repeticoes": 10,
+    "aluno_id": 1
+  }'
+```
 
-Documento curto e direto, alinhado ao estilo já presente acima.
+**Resposta (201):**
+```json
+{
+  "id": 1,
+  "nome": "Supino",
+  "grupo_muscular": "Peito",
+  "series": 4,
+  "repeticoes": 10,
+  "aluno_id": 1
+}
+```
+
+### Listar Exercícios
+```bash
+curl -X GET http://localhost:5000/exercicio
+```
+
+### Buscar Exercício por ID
+```bash
+curl -X GET http://localhost:5000/exercicio/1
+```
+
+### Atualizar Exercício (PUT)
+```bash
+curl -X PUT http://localhost:5000/exercicio/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Supino Inclinado",
+    "grupo_muscular": "Peito",
+    "series": 3,
+    "repeticoes": 12,
+    "aluno_id": 1
+  }'
+```
+
+### Atualizar Parcialmente (PATCH)
+```bash
+curl -X PATCH http://localhost:5000/exercicio/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "repeticoes": 15
+  }'
+```
+
+### Deletar Exercício
+```bash
+curl -X DELETE http://localhost:5000/exercicio/1
+```

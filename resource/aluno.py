@@ -2,11 +2,11 @@ from flask import jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
-from db import alunos
-
-import uuid
-
 from schemas.aluno import AlunoSchema, AlunoSchemaUpdate
+from sqlalchemy.exc import SQLAlchemyError
+
+from db import db
+from models.aluno import AlunoModel
 
 aluno_bp = Blueprint("aluno", __name__, description="operação relacionada alunos")
 
@@ -16,7 +16,7 @@ class Aluno(MethodView):
 
     @aluno_bp.response(200, AlunoSchema(many=True))
     def get(self):
-        return jsonify({"alunos": list(alunos.values())}), 200
+        return AlunoModel.query.all()
     
 
 
@@ -24,13 +24,17 @@ class Aluno(MethodView):
     @aluno_bp.response(201, AlunoSchema)
     def post(self, dado):
 
-        aluno_id = uuid.uuid4().hex
+        novo_aluno = AlunoModel(**dado)
+        try:
+            db.session.add(novo_aluno)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f'Erro: {str(e)}')
+            abort(400, message="Erro ao criar aluno: camos obrigatórios faltando")
 
-        novo_aluno = {**dado, "id":aluno_id}
-        alunos[aluno_id] = novo_aluno
+        return novo_aluno
 
-
-        return jsonify({"aluno criado": novo_aluno}), 201
 
 
 
@@ -39,33 +43,44 @@ class AlunoId(MethodView):
 
     @aluno_bp.response(200, AlunoSchema)
     def get(self, id):
-        try:
-            aluno = alunos[id]
-            return jsonify({"aluno": aluno}), 200
-        except KeyError:
-            abort(404, message="aluno não encontrado.")
-            
+        aluno = AlunoModel.query.get(id)
+
+        if not aluno:
+            abort(404, message="Aluno não encontrado")
+
+        return aluno
 
 
     @aluno_bp.arguments(AlunoSchemaUpdate)
     @aluno_bp.response(200, AlunoSchema)
     def put(self, dado, id):
+        aluno = AlunoModel.query.get(id)
 
-        for aluno in alunos.values():
-            if aluno['id'] == id:
-                aluno.update(dado)
+        if not aluno:
+            abort(404, message="Aluno não encontrado")
+        
+        aluno.nome = dado["nome"]
+        aluno.idade = dado["idade"]
+        aluno.cpf = dado["cpf"]
 
-                return jsonify({"aluno atualizado": aluno}), 200
-            
-        return jsonify({"erro": "aluno não encontrado"}), 404
+        try:
+            db.session.add(aluno)
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            abort(400, message="Todos os campos são obrigatórios")
+        
+        return aluno
     
 
 
     @aluno_bp.response(200)
     def delete(self, id):
-        try:
-            alunos.pop(id)
-        
-            return jsonify({"mensagem": "aluno removido com sucesso"}), 200
-        except KeyError:
-            abort(404, message="aluno não encontrado.")
+        aluno = AlunoModel.query.get(id)
+
+        if not aluno:
+            abort(404, message="Aluno não encontrado")
+
+        db.session.delete(aluno)
+        db.session.commit()
+        return jsonify({'message': 'Aluno removido com sucesso'})
